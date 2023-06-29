@@ -1,31 +1,39 @@
-import { MongoClient, ObjectId} from 'mongodb';
-import MongoDotNotation from 'mongo-dot-notation';
+require('dotenv').config();
 
-const DB_NAME = process.env.DATABASE_NAME;
-const DB_URL = process.env.DATABASE_URL;
+const mongoose = require('mongoose');
+const MONGODB_URI = process.env.MONGODB_URI;
 
-export const client = new MongoClient(DB_URL);
+console.log(MONGODB_URI);
+if (!MONGODB_URI) {
+    throw new Error(
+        "Please define the MONGODB_URI environment variable inside .env.local"
+    );
+}
 
-const doDatabaseOperation = async (operation) => {
-    let result = null;
+let cached = global.mongoose;
 
-    try {
-        await client.connect();
-        result = await(operation(client.db(DB_NAME)));
-    } catch(err) {
-        console.log(err);
-    } finally {
-        await client.close();
+if (!cached) {
+    cached = global.mongoose = { conn: null, promise: null };
+}
+
+async function dbConnect() {
+    if (cached.conn) {
+        return cached.conn;
     }
 
-    return result;
+    if (!cached.promise) {
+        const opts = {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            bufferCommands: false
+        };
+
+        cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+            return mongoose;
+        });
+    }
+    cached.conn = await cached.promise;
+    return cached.conn;
 }
 
-
-const addUser = async(collectionName, data) => {
-    return doDatabaseOperation( async(db) => {
-        return db.collection(collectionName).insertOne(data);
-    })
-}
-
-module.exports = addUser;
+module.exports = {dbConnect};

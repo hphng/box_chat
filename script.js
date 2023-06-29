@@ -40,7 +40,7 @@ function getData(form) {
 
 
 //notificate new user 
-socket.emit('new-user', username)
+socket.emit('new-user', roomID)
 
 //console.log(username);
 displayMessage("You joined!")
@@ -57,11 +57,8 @@ socket.on('user-connected', name => {
 
 socket.emit('join-room', roomID); 
 
-if(roomID != ""){
-    socket.on('admin', roomID => {
-        displayMessage('admin has assigned to: ', roomID);
-    })
-}
+socket.emit('disconnected', roomID);
+
 //notification user disconnect
 socket.on('user-disconnected', name => { 
     displayMessage(name + " disconnected!");

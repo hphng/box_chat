@@ -1,23 +1,40 @@
 require('dotenv').config();
 
+const express = require('express');
+const app = express();
+
+const http = require('http');
+const server = http.createServer(app);
+const {Server} = require('socket.io');
+
 const uuid = require('uuid');
 const PORT = process.env.PORT;
 const User = require('./models/user.model');
-const {dbConnect} = require('./services/databaseService');
+//const {dbConnect} = require('./services/databaseService');
 
-const io = require('socket.io')(PORT, {
-    cors: {
-        origin: ["http://127.0.0.1:5500"]
-    }
-});
+const io = new Server(server);
+
+app.use(express.static(__dirname));
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+})
+
+app.get('/user', (req, res) => {
+    res.sendFile(__dirname + '/user.html')
+})
+
+server.listen(PORT, () => {
+    console.log('listening on port 3000');
+})
+
 const users = {};
-
 const getName = (socketid) => {
     return users[socketid]? "User":"Admin";
 }
 
+const userNameSpace = io.of('/user');
 //connect to socket io server 
-io.on('connection', (socket) => {
+userNameSpace.on('connection', (socket) => {
     socket.on('new-user', async (roomID) => {
         //await dbConnect();
         
@@ -49,13 +66,11 @@ io.on('connection', (socket) => {
         console.log(roomID);
 
         const map = new Map();
-        socket.on('send-chat-message', async(message) => {
+        socket.on('send-chat-message', async (message) => {
             console.log(message, roomID);
             map.set(roomID, message); 
 
-            socket.to(roomID).emit('chat-message', {message: message, name: getName(socket.id) })
-
-                //send disconnect message to user
+            socket.to(roomID).emit('chat-message', {message: message, name: getName(socket.id) });
         }); 
 
 

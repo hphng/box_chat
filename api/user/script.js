@@ -5,8 +5,8 @@ const messageContainer = document.getElementById('message-container');
 const messageForm = document.getElementById('send-container');
 const messageInput = document.getElementById('message-input');
 
-var roomID = prompt("enter the room id (admin): ");   
-
+var roomID = prompt("enter the room id (admin): ");     
+ 
 var user ={};
 var username;
 
@@ -40,8 +40,6 @@ socket.on('chat-message', message => {
     console.log(message);
     displayMessage(`${message.name} : ${message.message}`);
 });
-
-
 
  
 //after clicking button, add message to server

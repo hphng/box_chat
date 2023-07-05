@@ -1,10 +1,30 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
-    socketId: 
+    fullname: 
     {
         type: String,
-        required: true,
+        required: [true, 'fullname is required'],
+        trim: true,
+    },
+    company:
+    {
+        type: String,
+        required: [true,"company name is required"],
+        trim: true,
+    },
+    email:
+    {
+        type: String,
+        trim: true,
+        lowercase: true,
+        required: [true, "email address is required"],
+    },
+    message:
+    {
+        type: String,
+        required: false,
+        trim: true,
     },
 });
 

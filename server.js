@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const express = require('express');
+const bodyParser = require('body-parser');
 const app = express();
 
 const http = require('http');
@@ -14,14 +15,33 @@ const User = require('./models/user.model');
 
 const io = new Server(server);
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(__dirname));
+
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 })
 
-app.get('/user', (req, res) => {
-    res.sendFile(__dirname + '/user.html')
-})
+app
+    .get('/user', (req, res) => {
+        res.sendFile(__dirname + '/public/user.html');
+    })
+    .get('/info', (req, res) => {
+        res.sendFile(__dirname+ '/public/userInfo.html')
+    })
+
+app.post('/info', (req, res) => {
+        try{    
+            let data = req.body; 
+            console.log(data);
+            console.log(123);
+            res.send(data);
+        }catch(err){
+            console.log(err);
+            res.send('an error is occurred!');
+        }
+    })
 
 server.listen(PORT, () => {
     console.log('listening on port 3000');

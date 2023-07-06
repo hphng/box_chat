@@ -19,23 +19,35 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(__dirname));
 
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
-})
-
 app
+    .get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+    })
     .get('/user', (req, res) => {
         res.sendFile(__dirname + '/public/user.html');
     })
-    .get('/info', (req, res) => {
-        res.sendFile(__dirname+ '/public/userInfo.html')
+    .get('/userInfo', (req, res) => {
+        res.sendFile(__dirname+ '/public/userInfo.html');
+    })
+    .get('/adminInfo', (req, res) => {
+        res.sendFile(__dirname + '/public/adminInfo.html');
     })
 
-app.post('/info', (req, res) => {
+app.post('/userInfo', (req, res) => {
         try{    
             let data = req.body; 
             console.log(data);
             console.log(123);
+            res.send(data);
+        }catch(err){
+            console.log(err);
+            res.send('an error is occurred!');
+        }
+    })
+    .post('/adminInfo', (req, res) => {
+        try{
+            const data = req.body;
+            console.log(data);
             res.send(data);
         }catch(err){
             console.log(err);

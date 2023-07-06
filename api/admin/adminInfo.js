@@ -1,13 +1,9 @@
-const username = document.getElementById('name');
-const email = document.getElementById('email');
-const company = document.getElementById('company');
-const message = document.getElementById('message');
 
-const form = document.getElementById('user-info');
+const form = document.getElementById('admin-info');
 
 form.addEventListener('submit', e => {
     e.preventDefault();
-    const f = $('#user-info');
+    const f = $('#admin-info');
     const formData = f.serializeArray();
 
     const jsonData = {};
@@ -15,14 +11,14 @@ form.addEventListener('submit', e => {
       jsonData[field.name] = field.value;
     });
     $.ajax({
-        url: '/userInfo',
+        url: '/adminInfo',
         type: 'POST',
         dataType: "json",
         data: JSON.stringify(jsonData),
         contentType: 'application/json',
         success: function(response) {
           console.log('Form submitted successfully!');
-          window.location.assign("http://localhost:3000/user")
+          //window.location.assign("http://localhost:3000/user")
           //console.log(response);
         },
         error: function(xhr, status, error) {

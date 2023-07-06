@@ -13,6 +13,7 @@ form.addEventListener('submit', e => {
     const jsonData = {};
     $.each(formData, function(index, field) {
       jsonData[field.name] = field.value;
+      console.log(field);
     });
     $.ajax({
         url: '/userInfo',
@@ -22,7 +23,7 @@ form.addEventListener('submit', e => {
         contentType: 'application/json',
         success: function(response) {
           console.log('Form submitted successfully!');
-          window.location.assign("http://localhost:3000/user")
+          //window.location.assign("http://localhost:3000/user")
           //console.log(response);
         },
         error: function(xhr, status, error) {

@@ -12,6 +12,12 @@ form.addEventListener('submit', (e) => {
       console.log(field);
     });
 
+    if(typeof(Storage) !== "undefined"){
+      localStorage.setItem("name", jsonData['name']);
+    }else{
+      console.log("error with local storage");
+    }
+
 
     $.ajax({
         url: '/adminInfo',
@@ -22,8 +28,7 @@ form.addEventListener('submit', (e) => {
         success: function(response) {
           console.log('Form submitted successfully!');
           //console.log(response);
-          window.location.assign("http://localhost:3000/adminChat")
-          //console.log(response);
+          window.location.assign(`http://localhost:3000/adminChat?adminID=${response.adminID}`)
         },
         error: function(xhr, status, error) {
           console.error('Error:', error);

@@ -6,6 +6,8 @@ const server = http.createServer(app);
 //const io = new Server(server)
 const PORT = process.env.PORT;
 
+
+const redisClient = require('./services/redis');
 const {createSocket, userSocket, adminChatSocket} = require('./services/socket')
 
 

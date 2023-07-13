@@ -1,6 +1,10 @@
 
 const uuid = require('uuid');
 const {Server} = require('socket.io');
+const redisClient = require('./redis');
+const User = require('../models/user.model');
+const Admin = require('../models/admin.model');
+const {dbConnect} = require('./mongoDb');
 
 const createSocket = (server) => {
     const io = new Server(server)
@@ -8,100 +12,92 @@ const createSocket = (server) => {
 }
 
 const userSocket = async(io) => {
-    const users = {};
-    const getName = (socketid) => {
-        return users[socketid]? "User":"Admin";
-    }
+    // await redisClient.connect();
+    await dbConnect();
 
     const userNameSpace = io.of('/user');
     //connect to socket io server 
-    userNameSpace.on('connection', (socket) => {
-        socket.on('new-user', async (roomID) => {
-            //await dbConnect();
-            let name = 'User';
-            const Id = uuid.v4();
-            if(roomID){
-                name = 'Admin';
-            } else{
-                //const socketUser = new User(); 
-                users[socket.id] = Id;
-                //socketUser.socketId = socket.id;
-                //console.log(socketUser);
-                //socketUser.save();
+    userNameSpace.on('connection', async (socket) => {
+        console.log("a user connected! ", socket.id);
+
+        socket.on('userClient', async ({userID, admin}) => {
+            socket.join(userID);
+
+            const user = await User.findById(userID).exec();
+            let name = admin;
+            if(!admin){
+                name = user.name;
             }
+            await user.save();
 
-            //console.log(users);
-            await socket.to(roomID).emit('user-connected', name);
-        })
+            const arrHistoryMessage = user.history;
 
-        socket.on('join-room', async (roomID) => {
-            console.log("new user");
-
-            if(roomID === ''){
-                roomID = users[socket.id];
-            }
+            await socket.emit('chat-history', arrHistoryMessage);
 
 
-            socket.join(roomID); 
-            console.log(roomID);
+            await socket.to(userID).emit('user-connected', name);
+            console.log(name);
 
-            const map = new Map();
+            await socket.to(userID).emit('user-disconnected', name);
+            
+            let lines = [];
             socket.on('send-chat-message', async (message) => {
-                console.log(message, roomID);
-                map.set(roomID, message); 
+                const line = name + ": " + message.message;
+                lines.push(line);
+                console.log(line);
+                console.log("[h]: ", lines);
 
-                socket.to(roomID).emit('chat-message', {message: message, name: getName(socket.id) });
+                const userSave = await User.findById(userID);
+                await userSave.history.push(line);
+                await userSave.save();
+
+                socket.to(userID).emit('chat-message', {message: message.message, name: name });
             }); 
 
+        })
 
 
         // //send message to user
         // socket.on('send-chat-message', message => {
         //     socket.emit('chat-message', {message: message, name: users[socket.id]})
         //     console.log(message);   
-        })
-
-        socket.on('disconnected', async (roomID) => {
-            if(!roomID){
-                roomID = users[socket.id];
-            }
-            socket.on('disconnect', () => {
-                socket.to(roomID).emit('user-disconnected',  getName(socket.id));
-                delete users[socket.id]; 
-            })
-        })
       
     })
 }
 
 const adminChatSocket = async(io) => { 
-    const users = {};
 
     const adminChatNameSpace = io.of('/adminChat');
     //connect to socket io server 
-    adminChatNameSpace.on('connection', (socket) => {
-        console.log('an admin connected s');
-        socket.on('new-admin', async (roomID) => {
-            //await dbConnect();
-            let name = 'Admin';
-            const Id = uuid.v4();
-            users[socket.id] = Id;
-            await socket.to(roomID).emit('user-connected', name);
+    adminChatNameSpace.on('connection', async (socket) => {
+        console.log('an admin connected!');
+
+        await dbConnect();
+        // socket.on('new-admin', async ({adminID, roomID}) => {
+        //     console.log(adminID);
+        //     const admin = await Admin.findById(adminID).exec();
+        //     const name = admin.name;
+
+        //     await socket.to(roomID).emit('admin-connected', name);
+        //     console.log(name);
+        // })
+
+        socket.on('adminClient', async ({adminID, roomID}) => {
+            socket.join(roomID); 
+
+            const admin = await Admin.findById(adminID).exec();
+            const name = admin.name; 
+            await socket.to(roomID).emit('admin-connected', name);
+
+            socket.on('send-chat-message', async (message) => {
+                console.log(name, message);
+                socket.to(roomID).emit('chat-message', {message: message, name: name });
+            });
         })
 
-        socket.on('join-room', async (roomID) => {
-            console.log("new admin");
-
-            socket.join(roomID); 
-            console.log(roomID);
-
-            const map = new Map();
-            socket.on('send-chat-message', async (message) => {
-                console.log(message, roomID);
-                map.set(roomID, message); 
-
-                socket.to(roomID).emit('chat-message', {message: message, name: users[socket.id] });
-            }); 
+        socket.on('join-user-chat', (userId) => {
+            console.log(userId); 
+        })
 
 
 
@@ -109,17 +105,7 @@ const adminChatSocket = async(io) => {
         // socket.on('send-chat-message', message => {
         //     socket.emit('chat-message', {message: message, name: users[socket.id]})
         //     console.log(message);   
-        })
 
-        socket.on('disconnected', async (roomID) => {
-            if(!roomID){
-                roomID = users[socket.id];
-            }
-            socket.on('disconnect', () => {
-                socket.to(roomID).emit('user-disconnected',  users[socket.id]);
-                delete users[socket.id]; 
-            })
-        })
       
     })
 }

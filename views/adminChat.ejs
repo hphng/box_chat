@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Chat App</title>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    #message-container {
+      height: 100vh;
+      overflow: scroll;
+      position: relative;
+    }
+
+    .container {
+      width: 100%;
+    }
+
+    .col-sm {
+      width: 50%;
+    }
+
+    #message-container div {
+      background-color: #CCC;
+      padding: 5px;
+      right: 0;
+      align-content: right;
+      margin-right: 10vw;
+      padding-top: 2vh;
+    }
+
+    #message-container div:nth-child(2n) {
+      background-color: #FFF;
+    }
+
+    #send-container {
+      background-color: white;
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      right: 0;
+    }
+
+    #message-input {
+      flex-grow: 1;
+    }
+
+    #list-users {
+      float: left;
+      left: 0;
+    }
+
+    #chat {
+      position: relative;
+    }
+
+    .row {
+      display: flex;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm">
+        <ul id="list-users">
+          <% users.forEach(function(user) { %>
+            <li>
+              <%= user.name %>
+              <button onclick="joinUserChat('<%= user._id %>')">Join Chat</button>
+            </li>
+          <% }); %>
+        </ul>
+      </div>
+      <div class="col-sm" id="chat">
+        <div id="message-container"></div>
+        <form id="send-container">
+          <input type="text" id="message-input">
+          <button type="submit" id="send-button">Send</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script src='./api/admin/adminChat.js'></script>
+  <script>
+    var socket  = io('/user');
+
+    async function joinUserChat(userID){
+      let name="admin";
+      if(typeof(Storage) !== "undefined"){
+        name = localStorage.getItem("name");
+      }
+      window.location.href = '/user?userID='+userID + '&admin='+name;
+    }
+  </script>
+</body>
+</html>

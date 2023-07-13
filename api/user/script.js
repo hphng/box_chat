@@ -1,65 +1,63 @@
 
-var socket = io('/user');
+document.addEventListener("DOMContentLoaded", (event) => {
+    var url = new URL(window.location.href);
+    var userID = url.searchParams.get("userID");
+    var admin = url.searchParams.get('admin');
 
-const messageContainer = document.getElementById('message-container');
-const messageForm = document.getElementById('send-container');
-const messageInput = document.getElementById('message-input');
+    var socket = io('/user');
 
-var roomID = prompt("enter the room id (admin): ");     
- 
-var user ={};
-var username;
+    const messageContainer = document.getElementById('message-container');
+    const messageForm = document.getElementById('send-container');
+    const messageInput = document.getElementById('message-input');
 
-//notificate new user 
-socket.emit('new-user', roomID)
+    //notificate new user 
+    socket.emit('new-user', ({userID, admin}))
+    socket.emit('userClient', ({userID, admin}));
 
-//console.log(username);
-displayMessage("You joined!")
-if(roomID === ''){
-    displayMessage('waiting for the admin...');
-}
+    socket.on('chat-history', arrHistoryMessage => {
+        arrHistoryMessage.forEach((line) => {
+            displayMessage(line);
+            console.log('client-side: ' + line)
+        })
+    })
 
-//notification user connect
-socket.on('user-connected', name => { 
-    displayMessage(name + " joined!");
-})
-
-
-
-socket.emit('join-room', roomID); 
-
-socket.emit('disconnected', roomID);
-
-//notification user disconnect
-socket.on('user-disconnected', name => { 
-    displayMessage(name + " disconnected!");
-}) 
+    //console.log(username);
+    displayMessage("You joined!")
+    if(!admin){
+        displayMessage('waiting for the admin...');
+    }
+    //notification user connect
+    socket.on('user-connected', name => {
+        displayMessage(name + " joined!");
+    });
 
 
-socket.on('chat-message', message => {
-    console.log(message);
-    displayMessage(`${message.name} : ${message.message}`);
+
+    socket.on('chat-message', message => {
+        console.log(message);
+        displayMessage(`${message.name}: ${message.message}`);
+    });
+
+
+    //after clicking button, add message to server
+    messageForm.addEventListener('submit', e => {
+        e.preventDefault();
+        message = messageInput.value;
+        if (message !== '') {
+            displayMessage(`You: ${message}`);
+            socket.emit('send-chat-message', {message})
+            messageInput.value = '';
+        }
+        else {
+            alert("please type your message before send");
+        }
+    })
+
+    function displayMessage(message) {
+        console.log(message);
+        const messageElement = document.createElement('div');
+        messageElement.innerHTML = message;
+        messageContainer.append(messageElement);
+        window.scrollTo(0, document.body.scrollHeight);
+    }
 });
-
- 
-//after clicking button, add message to server
-messageForm.addEventListener('submit', e => {
-    e.preventDefault();
-    message = messageInput.value;
-    if(message !== ''){
-        displayMessage(`You: ${message}`);
-        socket.emit('send-chat-message', message)
-        messageInput.value = '';
-    }
-    else{
-        alert("please type your message before send");
-    }
-})
-
-function displayMessage(message){
-    console.log(message);
-    const messageElement = document.createElement('div');
-    messageElement.innerHTML = message;
-    messageContainer.append(messageElement);
-    window.scrollTo(0, document.body.scrollHeight);
-}       

@@ -7,12 +7,6 @@ const adminSchema = new mongoose.Schema({
         required: [true, 'fullname is required'],
         trim: true,
     },
-    socketID:
-    {
-        type: String,
-        trim: true,
-        required: false,
-    }
 });
 
 const Admin = mongoose.models.admin || mongoose.model('admin', adminSchema);

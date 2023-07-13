@@ -23,7 +23,7 @@ form.addEventListener('submit', e => {
         contentType: 'application/json',
         success: function(response) {
           console.log('Form submitted successfully!');
-          window.location.assign("http://localhost:3000/user")
+          window.location.assign(`http://localhost:3000/user?userID=${response.userID}`)
           //console.log(response);
         },
         error: function(xhr, status, error) {

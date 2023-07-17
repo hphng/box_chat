@@ -32,13 +32,14 @@ const userSocket = async(io) => {
 
             const arrHistoryMessage = user.history;
 
+
+            console.log(arrHistoryMessage);
             await socket.emit('chat-history', arrHistoryMessage);
 
 
             await socket.to(userID).emit('user-connected', name);
             console.log(name);
 
-            await socket.to(userID).emit('user-disconnected', name);
             
             let lines = [];
             socket.on('send-chat-message', async (message) => {
@@ -53,6 +54,10 @@ const userSocket = async(io) => {
 
                 socket.to(userID).emit('chat-message', {message: message.message, name: name });
             }); 
+
+            socket.on('disconnect', () => {
+                socket.to(userID).emit('user-disconnected', name);
+            })
 
         })
 

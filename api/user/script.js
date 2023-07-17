@@ -38,6 +38,10 @@ document.addEventListener("DOMContentLoaded", (event) => {
         displayMessage(`${message.name}: ${message.message}`);
     });
 
+    socket.on('user-disconnected', (name) => {
+        displayMessage(`${name} disconnected!`)
+    })
+
 
     //after clicking button, add message to server
     messageForm.addEventListener('submit', e => {

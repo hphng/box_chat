@@ -23,8 +23,8 @@ const getAdminChatPage = async (req, res) => {
     try{
         await dbConnect();
 
-        const users = await User.find({});
-        //console.log(users);
+        const users = await User.find({onlineStatus: true});
+        console.log("[get admin page]", users);
         res.render(__dirname + '/views/adminChat.ejs', {users: users});
     }catch(err){
         console.log(err);
@@ -41,16 +41,22 @@ const postUserInfo = async (req, res) => {
         const { name, company, email, message } = data;
 
         if(!name || !company || !email){
-            return res.status(500).send('asadsadsasd');
+            return res.status(500).send('not enough information');
         }
 
         if(!message){
             data.message = "nothing";
         }
 
-        const user = new User(data);
-        await user.save();
+        const history = [`${name}: ${message}`];
+        data.history = history;
+
+        data.onlineStatus = false;
+
+        const user = await User.findOneAndUpdate({email: email}, data, {upsert: true, new: true});
         const userID = user._id.toString();
+
+        console.log('online status is: ', data.onlineStatus);
         
         console.log(data);
 

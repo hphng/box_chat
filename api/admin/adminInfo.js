@@ -13,7 +13,7 @@ form.addEventListener('submit', (e) => {
     });
 
     if(typeof(Storage) !== "undefined"){
-      localStorage.setItem("name", jsonData['name']);
+      localStorage.setItem("adminName", jsonData['name']);
     }else{
       console.log("error with local storage");
     }

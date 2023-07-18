@@ -24,29 +24,28 @@ const userSocket = async(io) => {
             socket.join(userID);
 
             const user = await User.findById(userID).exec();
+            user.onlineStatus = true;
             let name = admin;
             if(!admin){
                 name = user.name;
             }
+
             await user.save();
-
+ 
+            
             const arrHistoryMessage = user.history;
-
-
             console.log(arrHistoryMessage);
             await socket.emit('chat-history', arrHistoryMessage);
 
 
             await socket.to(userID).emit('user-connected', name);
             console.log(name);
-
             
             let lines = [];
             socket.on('send-chat-message', async (message) => {
                 const line = name + ": " + message.message;
                 lines.push(line);
                 console.log(line);
-                console.log("[h]: ", lines);
 
                 const userSave = await User.findById(userID);
                 await userSave.history.push(line);
@@ -55,10 +54,15 @@ const userSocket = async(io) => {
                 socket.to(userID).emit('chat-message', {message: message.message, name: name });
             }); 
 
-            socket.on('disconnect', () => {
+            socket.on('disconnect', async () => {
+                if(!admin){
+                    const user = await User.findById(userID);
+                    user.onlineStatus = false;
+                    await user.save();
+                }
+                console.log("[disconnect]:", user)
                 socket.to(userID).emit('user-disconnected', name);
             })
-
         })
 
 

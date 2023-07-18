@@ -15,6 +15,12 @@ form.addEventListener('submit', e => {
       jsonData[field.name] = field.value;
       console.log(field);
     });
+
+    if(typeof(Storage) !== "undefined"){
+      localStorage.setItem("userMessage", jsonData['message']);
+    }else{
+      console.log("error with local storage");
+    }
     $.ajax({
         url: '/userInfo',
         type: 'POST',

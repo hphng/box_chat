@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
     const messageForm = document.getElementById('send-container');
     const messageInput = document.getElementById('message-input');
 
-
+    
     displayMessage('You joined!')
 
     const roomID = 'admin';

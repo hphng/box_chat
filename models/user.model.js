@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema({
         trim: true,
         lowercase: true,
         required: [true, "email address is required"],
+        unique: true,
     },
     message:
     {
@@ -29,7 +30,13 @@ const userSchema = new mongoose.Schema({
     history:
     [{
         type: String,
-    }]
+    }],
+    onlineStatus:
+    {
+        type: Boolean,
+        required: false,
+        default: false,
+    }
 });
 
 const User = mongoose.models.user || mongoose.model('user', userSchema);

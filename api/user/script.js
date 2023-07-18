@@ -10,6 +10,11 @@ document.addEventListener("DOMContentLoaded", (event) => {
     const messageForm = document.getElementById('send-container');
     const messageInput = document.getElementById('message-input');
 
+    // let userMessage = "";
+    // if(typeof(Storage) !== "undefined"){
+    //     userMessage = localStorage.getItem("userMessage");
+    // }
+
     //notificate new user 
     socket.emit('new-user', ({userID, admin}))
     socket.emit('userClient', ({userID, admin}));
@@ -17,7 +22,6 @@ document.addEventListener("DOMContentLoaded", (event) => {
     socket.on('chat-history', arrHistoryMessage => {
         arrHistoryMessage.forEach((line) => {
             displayMessage(line);
-            console.log('client-side: ' + line)
         })
     })
 
@@ -26,12 +30,11 @@ document.addEventListener("DOMContentLoaded", (event) => {
     if(!admin){
         displayMessage('waiting for the admin...');
     }
+
     //notification user connect
     socket.on('user-connected', name => {
         displayMessage(name + " joined!");
     });
-
-
 
     socket.on('chat-message', message => {
         console.log(message);

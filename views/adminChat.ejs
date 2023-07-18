@@ -96,7 +96,7 @@
     async function joinUserChat(userID){
       let name="admin";
       if(typeof(Storage) !== "undefined"){
-        name = localStorage.getItem("name");
+        name = localStorage.getItem("adminName");
       }
       window.location.href = '/user?userID='+userID + '&admin='+name;
     }
